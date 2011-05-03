@@ -1,6 +1,3 @@
-
-$Id: CHANGES,v 1.2 2004/02/18 23:05:05 cvs Exp $
-
 version: 0.1
 - Initial release.
 
@@ -25,3 +22,14 @@ version: 0.3
 - Encoded lines size now is 128 chars.
 - using fread() instead of fgets in decode() function (much faster).
 - SWIG isn't used anymore for wrapper generation.
+
+version: 0.4
+- change license to LGPL
+- Python longs are now returned from C level, crc32 sums are now correctly handled
+- 'bytes' arguments named 'bytez' to avoid collision with 'bytes' type
+- basic unit testing
+- unescaped dots at the beginning of line caused ydecode to fail under some circumstances
+  beginning dots are now always escaped
+- minor code enhancements
+
+

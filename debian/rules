@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PYTHON='python2.1'
+PYTHON='python2.6'
 
 build: clean
 	/usr/bin/env $PYTHON setup.py build
@@ -11,7 +11,7 @@ binary: binary-arch binary-indep
 
 binary-indep:
 	dpkg-gencontrol
-	dpkg --build debian/tmp ../python-yenc_0.3.deb
+	dpkg --build debian/tmp ../python-yenc_0.4.deb
 
 binary-arch:
 

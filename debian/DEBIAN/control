@@ -1,7 +1,7 @@
 Package: python-yenc
 Architecture: i386
-Version: 0.3
-Depends: python2.1
+Version: 0.4
+Depends: python2.6
 Maintainer: Alessandro Duca (DuAL) <alessandro.duca@gmail.com>
 Section: news
 Priority: optional

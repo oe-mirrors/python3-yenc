@@ -1,5 +1,23 @@
-
-$Id: README,v 1.2 2004/02/18 23:05:05 cvs Exp $
+##=============================================================================
+ #
+ # Copyright (C) 2003, 2011 Alessandro Duca <alessandro.duca@gmail.com>
+ #
+ # This library is free software; you can redistribute it and/or
+ #modify it under the terms of the GNU Lesser General Public
+ # License as published by the Free Software Foundation; either
+ # version 2.1 of the License, or (at your option) any later version.
+ #
+ # This library is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ # Lesser General Public License for more details.
+ #
+ # You should have received a copy of the GNU Lesser General Public
+ # License along with this library; if not, write to the Free Software
+ # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ #=============================================================================
+ # 
+##=============================================================================
 
 Description:
 -----------
@@ -28,7 +46,7 @@ with 1.5.2 (as long as you have distutils I think).
 Installation:
 ------------
 To install:
-tar xzfv yenc-0.3.tar.gz
+tar xzfv yenc-0.3.1.tar.gz
 cd yenc-0.3
 python setup.py build
 su
@@ -77,7 +95,27 @@ output can't be written or calculated crc doesn't match the optional crc_in
 argument (useful for writing decoding tools).
 
 CRC32 sums are always represented as lowercase strings, whithout any
-preceeding simbol ( like '0x').
+preceeding simbol (like '0x').
+
+
+Notes:
+-----
+There's a (IMO irrilevant) issue in the way CRC32 sums are returned  (see 
+http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg498354.html),
+the behaviour is the same of binascii, the returned value is in the range 
+[-2**31, 2**31-1].
+
+Use: 
+
+    value = value & 0xFFFFFFFF
+
+if you want value to be in the range [0, 2**32-1].
+
+I don't consider this a bug and so I won't change this behaviour for Python 2.x 
+releases. It will change only for released targeting Python 3.x to stay consistent
+with binascii behaviour (probably named 0.5.x).
+
+(see: http://docs.python.org/library/binascii.html#binascii.crc32)
 
 
 Performances:

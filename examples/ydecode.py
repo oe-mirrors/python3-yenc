@@ -1,26 +1,23 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 ##=============================================================================
  #
- # Copyright (C) 2003, 2004 Alessandro Duca <alessandro.duca@gmail.com>
+ # Copyright (C) 2003, 2011 Alessandro Duca <alessandro.duca@gmail.com>
  #
- # This program is free software; you can redistribute it and/or
- # modify it under the terms of the GNU General Public License
- # as published by the Free Software Foundation; either version 2
- # of the License, or (at your option) any later version.
- # 
- # This program is distributed in the hope that it will be useful,
+ # This library is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU Lesser General Public
+ # License as published by the Free Software Foundation; either
+ # version 2.1 of the License, or (at your option) any later version.
+ #
+ # This library is distributed in the hope that it will be useful,
  # but WITHOUT ANY WARRANTY; without even the implied warranty of
- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- # 
- # See the GNU General Public License for more details.
- # 
- # You should have received a copy of the GNU General Public License
- # along with this program; if not, write to the Free Software
- # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ # Lesser General Public License for more details.
  #
+ # You should have received a copy of the GNU Lesser General Public
+ # License along with this library; if not, write to the Free Software
+ # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  #=============================================================================
- #
- # $Id: ydecode.py,v 1.2 2004/02/18 23:10:11 cvs Exp $
  # 
 ##=============================================================================
 
@@ -36,7 +33,7 @@ CRC32_RE	= re.compile(r"^.*? crc32=(\w+)")
 
 def main():
 	if len(sys.argv) > 1:
-		file_in = open(sys.argv[1],"r")
+		file_in = open(sys.argv[1],"rb")
 	else:
 		file_in	= sys.stdin
 	while 1:
@@ -54,7 +51,7 @@ def main():
 		elif not line:
 			sys.stderr.write("err-critical: no valid =ybegin header found\n")
 			sys.exit(1)
-	file_out = open(name,"w")
+	file_out = open(name,"wb")
 	try:
 		dec, dec_crc = yenc.decode(file_in, file_out, size)
 	except yenc.Error, e:
