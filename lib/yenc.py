@@ -3,7 +3,7 @@
  # Copyright (C) 2003, 2011 Alessandro Duca <alessandro.duca@gmail.com>
  #
  # This library is free software; you can redistribute it and/or
- #modify it under the terms of the GNU Lesser General Public
+ # modify it under the terms of the GNU Lesser General Public
  # License as published by the Free Software Foundation; either
  # version 2.1 of the License, or (at your option) any later version.
  #
@@ -66,7 +66,7 @@ def encode(file_in, file_out, bytez=0):
 	
 	file_in, file_out, bytez = _checkArgsType(file_in, file_out, bytez)
 	encoded, crc32 = _yenc.encode(file_in, file_out, bytez)
-	return encoded, "%08x" % ((crc32 ^ BIN_MASK) & BIN_MASK)
+	return encoded, "%08x" % (crc32 ^ BIN_MASK)
 
 
 def decode(file_in, file_out, bytez=0, crc_in=""):
@@ -76,7 +76,7 @@ def decode(file_in, file_out, bytez=0, crc_in=""):
 	
 	file_in, file_out, bytez = _checkArgsType(file_in, file_out, bytez)
 	decoded, crc32 = _yenc.decode(file_in, file_out, bytez)
-	crc_hex = "%08x" % ((crc32 ^ BIN_MASK) & BIN_MASK)
+	crc_hex = "%08x" % (crc32 ^ BIN_MASK)
 	if crc_in and not cmp(crc_hex, crc_in.lower()):
 		raise Error("crc32 error", E_CRC32)
 	else:
@@ -93,19 +93,20 @@ class Encoder:
 		self._output_file = output_file
 		self._crc = BIN_MASK
 		self._encoded = 0
-		self._terminated = 0
+		self._feedable = True
 
 	def __del__(self):
-		if(self._output_file):
-			self._output_file.flush()
-			self._output_file.close()
+                if self._output_file is not None:
+                    self.flush()
+                    self.close()
 	
 	def feed(self, data):
 		"""	Encode some data and write the encoded data 
 			into the internal buffer
 		"""
-		if self._terminated:
+		if not self._feedable:
 			raise IOError("Encoding already terminated")
+
 		encoded, self._crc, self._column = _yenc.encode_string(data, self._crc, self._column)
 		self._encoded = self._encoded + len(encoded)
 		self._buffer.write(encoded)
@@ -114,26 +115,38 @@ class Encoder:
 	def terminate(self):
 		"""	Appends the terminal CRLF sequence to the encoded data
 		"""
-		self._terminated = 1
+		self._feedable = False
 		self._buffer.write("\r\n")
 	
 	def flush(self):
 		"""	Writes the content of the internal buffer on the file
 			passed as argument to the constructor
 		"""
-		if self._output_file:
-			self._output_file.write(self._buffer.getvalue())
-			self._buffer = StringIO()
-		else:
+		if self._output_file is None:
 			raise ValueError("Output file is 'None'")
+
+                self._output_file.write(self._buffer.getvalue())
+                self._buffer = StringIO()
+
+        def close(self):
+                """     Flushes and closes associated output file.
+                        The output buffer IS NOT automatically written to the file.
+                """
+                if self._output_file is None:
+                        raise ValueError("Output file is 'None'")
+
+                self._output_file.flush()
+                self._output_file.close()
+                self._output_file = None
+                self._feedable = False
 	
 	def getEncoded(self):
 		"""	Returns the data in the internal buffer
 		"""
-		if not self._output_file:
-			return self._buffer.getvalue()
-		else:
+		if self._output_file is not None:
 			raise ValueError("Output file is not 'None'")
+
+                return self._buffer.getvalue()
 	
 	def getSize(self):
 		"""	Returns the total number of encoded bytes (not the size of
@@ -145,7 +158,7 @@ class Encoder:
 		"""	Returns the calculated crc32 string for the clear
 			encoded data
 		"""
-                return "%08x" % ((self._crc ^ BIN_MASK) & BIN_MASK)
+                return "%08x" % (self._crc ^ BIN_MASK)
 
 
 class Decoder:
@@ -160,14 +173,15 @@ class Decoder:
 		self._decoded = 0
 	
 	def __del__(self):
-		if(self._output_file):
-			self._output_file.flush()
-			self._output_file.close()
+                if self._output_file is not None:
+                    self.flush()
+                    self.close()
 	
 	def feed(self, data):
-		"""	Encode some data and write the encoded data 
+		"""	Decode some data and write the decoded data 
 			into the internal buffer
 		"""
+
 		decoded, self._crc, self._escape = _yenc.decode_string(data, self._crc, self._escape)
 		self._decoded = self._decoded + len(decoded)
 		self._buffer.write(decoded)
@@ -177,19 +191,30 @@ class Decoder:
 		"""	Writes the content of the internal buffer on the file
 			passed as argument to the constructor
 		"""
-		if self._output_file:
-			self._output_file.write(self._buffer.getvalue())
-			self._buffer = StringIO()
-		else:
+		if self._output_file is None:
 			raise ValueError("Output file is 'None'")
+
+                self._output_file.write(self._buffer.getvalue())
+                self._buffer = StringIO()
+
+        def close(self):
+                """     Closes output file and free associated buffers.
+                        The output file is flushed before closing.
+                """
+		if self._output_file is None:
+			raise ValueError("Output file is 'None'")
+
+                self._output_file.flush()
+                self._output_file.close()
+                self._output_file = None
 	
 	def getDecoded(self):
 		"""	Returns the data in the internal buffer
 		"""
-		if not self._output_file:
-			return self._buffer.getvalue()
-		else:
+		if self._output_file is not None:
 			raise ValueError("Output file is not 'None'")
+
+                return self._buffer.getvalue()
 
 	def getSize(self):
 		"""	Returns the total number of decoded bytes (not the size of
@@ -200,5 +225,5 @@ class Decoder:
 	def getCrc32(self):
 		"""	Returns the calculated crc32 string for the decoded data
 		"""
-		return "%08x" % ((self._crc ^ BIN_MASK) & BIN_MASK)
+		return "%08x" % (self._crc ^ BIN_MASK) 
 

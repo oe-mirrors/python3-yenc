@@ -25,11 +25,12 @@ version: 0.3
 
 version: 0.4
 - change license to LGPL
-- Python longs are now returned from C level, crc32 sums are now correctly handled
+- crc32 codes are now Python longs (returned from _yenc calls) in the range [2**0, 2**32 -1]
+- crc32 formatting is fixed
 - 'bytes' arguments named 'bytez' to avoid collision with 'bytes' type
 - basic unit testing
 - unescaped dots at the beginning of line caused ydecode to fail under some circumstances
-  beginning dots are now always escaped
-- minor code enhancements
-
+  dots at the beginning of line are now always escaped
+- Encoder's and Decoder's output files (if any) are automatically flushed and closed upon deletion
+- new method close() on Encoder and Decoder
 

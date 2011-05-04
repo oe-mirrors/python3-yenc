@@ -69,8 +69,8 @@ def main():
 			dec.flush()
 	if trailer:
 		try:	
-			size = int( SIZE_RE.match(line).group(1) )
-			m_obj = CRC32_RE.match(line)
+			size = int(SIZE_RE.match(trailer).group(1))
+			m_obj = CRC32_RE.search(trailer)
 			if m_obj:
 				trail_crc = m_obj.group(1)
 		except re.error, e:
@@ -86,7 +86,7 @@ def main():
 	else:
 		sys.exit(0)
 #	print "comparing"
-	if cmp(tmp_crc,dec.getCrc32()):
+	if cmp(tmp_crc, dec.getCrc32()):
 		sys.stderr.write("err: header: %s dec: %s CRC32 mismatch\n" % (tmp_crc,dec.getCrc32()) )
 		sys.exit(1)
 	else:
