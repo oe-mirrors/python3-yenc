@@ -112,7 +112,7 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
         self._testDecodeFile(BaseTest.FILE_O)
 
 
-class TestEncoder(BaseTest, unittest.TestCase):
+class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
 
     def _testEncoderDecoder(self, filename):
         file_data, crc =  self._readFile(filename)
@@ -179,19 +179,27 @@ class TestEncoder(BaseTest, unittest.TestCase):
         self.assertFalse(decoder._output_file)
 
 
-class TestInMemory(unittest.TestCase):
+class TestEncoderDecoderInMemory(BaseTest, unittest.TestCase):
 
     def testEncodeInMemory(self):
+        """ Checks simple encoding in memory
+        """
         encoder = yenc.Encoder()
         encoder.feed('Hello world!')
         self.assertEquals('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK', encoder.getEncoded())
         self.assertEquals(encoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
+
+    def testEncodeAndWriteInMemory(self):
+        pass
 
     def testDecodeInMemory(self):
         decoder = yenc.Decoder()
         decoder.feed('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
         self.assertEquals("Hello world!", decoder.getDecoded())
         self.assertEquals(decoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
+
+    def testDecodeAndWriteInMemory(self):
+        pass
 
     def testEncoderCloseInMemory(self):
         encoder = yenc.Encoder()

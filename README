@@ -3,7 +3,7 @@
  # Copyright (C) 2003, 2011 Alessandro Duca <alessandro.duca@gmail.com>
  #
  # This library is free software; you can redistribute it and/or
- #modify it under the terms of the GNU Lesser General Public
+ # modify it under the terms of the GNU Lesser General Public
  # License as published by the Free Software Foundation; either
  # version 2.1 of the License, or (at your option) any later version.
  #
@@ -32,30 +32,36 @@ input and output and use filenames instead of file objects as arguments
 for encode() and decode() ). See CHANGES file for details.
 Version 0.3 doesn't introduce anything new, just a bugfix a some internals
 changes.
+Version 0.4 introduces the close() method on Encoder and Decoder, fixes
+crc32 formatting and adds escaping of '.' for compatibility with some ydecode 
+tools, strictly speaking this wasn't a bug and yenc specs reccomend this
+behaviour only for clients that write directly on the tcp steam. 
+
+Version 0.4 is meant to be backward compatible with both 0.3 and 0.2.
 
 
 Requirements:
 ------------
-A C developement environment, Python>=2.1 and python developement libs (look for 
+A C developement environment, Python>=2.6 and python developement libs (look for 
 python-dev or something like that if you're using .rpm or .deb packages, if you 
 installed from sources you already have everything you need).
-The module is known to work with Python2.1 and 2.2, maybe it will work also
-with 1.5.2 (as long as you have distutils I think).
+The module is known to work with Python2.6, testing with other version is needed.
 
 
 Installation:
 ------------
 To install:
-tar xzfv yenc-0.3.1.tar.gz
-cd yenc-0.3
+tar xzfv yenc-0.4.tar.gz
+cd yenc-0.4
 python setup.py build
 su
 python setup.py install
 
 To uninstall:
 Simply remove _yenc.so, yenc.py and yenc.pyc from your PYTHONPATH.
-On my Debian GNU/Linux 3.0:
-/usr/local/lib/python2.2/site-packages/{_yenc.so,yenc.py,yenc.pyc} 
+
+On my Ubuntu:
+/usr/local/lib/python2.6/site-packages/{_yenc.so,yenc.py,yenc.pyc} 
 
 
 Usage:
@@ -98,24 +104,44 @@ CRC32 sums are always represented as lowercase strings, whithout any
 preceeding simbol (like '0x').
 
 
-Notes:
------
-There's a (IMO irrilevant) issue in the way CRC32 sums are returned  (see 
-http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg498354.html),
-the behaviour is the same of binascii, the returned value is in the range 
-[-2**31, 2**31-1].
+Decoder and Encoder:
+-------------------
 
-Use: 
+Encoder and Decoder are facility classes meant for encoding data one chunk at time,
+optionally writing the encoded/decoded data to an output file.
 
-    value = value & 0xFFFFFFFF
+import yenc.Encoder
 
-if you want value to be in the range [0, 2**32-1].
+encoder = Encoder()
+encoder.feed('some data')
+encoder.feed('some other data')
+encoder.terminate() # writes the \r\n terminator on file, further feed(..) will fail
 
-I don't consider this a bug and so I won't change this behaviour for Python 2.x 
-releases. It will change only for released targeting Python 3.x to stay consistent
-with binascii behaviour (probably named 0.5.x).
+encoded_data = encoder.getEncoded() # returns encoded data as string
+crc32 = encoder.getCrc32() # returns crc32 of clear data
 
-(see: http://docs.python.org/library/binascii.html#binascii.crc32)
+
+optionally you can write onto an output file:
+
+encoder = Encoder(file('outputfile.ync', 'wb'))
+encoder.feed('some data')
+encoder.feed('some other data')
+encoder.terminate()
+encoder.flush() # writes the local buffer to the output file
+
+encoder.close() # flushes and closes output_file, called automatically upon deletion
+
+crc32 = encoder.getCrc32()
+
+Decoder works basically the same way:
+
+
+
+
+
+
+
+
 
 
 Performances:

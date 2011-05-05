@@ -30,7 +30,7 @@ version: 0.4
 - 'bytes' arguments named 'bytez' to avoid collision with 'bytes' type
 - basic unit testing
 - unescaped dots at the beginning of line caused ydecode to fail under some circumstances
-  dots at the beginning of line are now always escaped
+  dots at the beginning of line are now always escaped 
 - Encoder's and Decoder's output files (if any) are automatically flushed and closed upon deletion
 - new method close() on Encoder and Decoder
 
