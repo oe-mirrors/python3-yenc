@@ -133,15 +133,7 @@ encoder.close() # flushes and closes output_file, called automatically upon dele
 
 crc32 = encoder.getCrc32()
 
-Decoder works basically the same way:
-
-
-
-
-
-
-
-
+Decoder works basically the same way.
 
 
 Performances:
