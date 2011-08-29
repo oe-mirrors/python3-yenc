@@ -87,8 +87,8 @@ PyObject* decode_string(PyObject* ,PyObject* ,PyObject* );
 /* Python API requirements */
 static char encode_doc[] = "encode(input_file, output_file, <size>)";
 static char decode_doc[] = "decode(input_file, output_file, <size>)";
-static char encode_string_doc[] = "encode_string(input_string, output_string, startcolumn)";
-static char decode_string_doc[] = "decode_string(input_string, output_string, escape)";
+static char encode_string_doc[] = "encode_string(string, crc32, column)";
+static char decode_string_doc[] = "decode_string(string, crc32, escape)";
 static PyMethodDef funcs[] = {
         {"encode", (PyCFunction) encode_file, METH_KEYWORDS | METH_VARARGS, encode_doc},
         {"decode", (PyCFunction) decode_file, METH_KEYWORDS | METH_VARARGS, decode_doc},
