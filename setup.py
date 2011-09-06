@@ -30,6 +30,7 @@ setup(
 	author_email	 = "alessandro.duca@gmail.com",
         url		 = "https://bitbucket.org/dual75/yenc",
 	license		 = "LGPL",
+        platforms        = ["Unix"],
 	package_dir	 = { '': 'lib' },
 	py_modules	 = ["yenc"],
 	ext_modules	 = [Extension("_yenc",["src/_yenc.c"],extra_compile_args=["-O2","-g"])],
