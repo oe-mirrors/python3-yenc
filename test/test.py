@@ -179,7 +179,7 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
         self.assertFalse(decoder._output_file)
 
 
-class TestEncoderDecoderInMemory(BaseTest, unittest.TestCase):
+class TestEncoderDecoderInMemory(unittest.TestCase):
 
     def testEncodeInMemory(self):
         """ Checks simple encoding in memory
