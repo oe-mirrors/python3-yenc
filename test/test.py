@@ -41,12 +41,12 @@ class BaseTest(object):
     FILE_O = 'sampledata_o'
 
     def setUp(self):
-        os.system(BaseTest.CMD_DATA % (BaseTest.FILE_E, 128))
-        os.system(BaseTest.CMD_DATA % (BaseTest.FILE_O, 129))
+        os.system(self.CMD_DATA % (self.FILE_E, 128))
+        os.system(self.CMD_DATA % (self.FILE_O, 129))
 
     def tearDown(self):
-        os.unlink(BaseTest.FILE_E)
-        os.unlink(BaseTest.FILE_O)
+        os.unlink(self.FILE_E)
+        os.unlink(self.FILE_O)
         for x in os.listdir('.'):
             if x.endswith('.out') or x.endswith('.dec'):
                 os.unlink(x)
@@ -85,11 +85,11 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
 
 
     def testEncodeE(self):
-        self._testEncodeFile(BaseTest.FILE_E)
+        self._testEncodeFile(self.FILE_E)
 
 
     def testEncodeO(self):
-        self._testEncodeFile(BaseTest.FILE_O)
+        self._testEncodeFile(self.FILE_O)
 
 
     def _testDecodeFile(self, filename):
@@ -106,10 +106,10 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
         self.assertEquals(crc, crc_dec)
 
     def testDecodeE(self):
-        self._testDecodeFile(BaseTest.FILE_E)
+        self._testDecodeFile(self.FILE_E)
 
     def testDecodeO(self):
-        self._testDecodeFile(BaseTest.FILE_O)
+        self._testDecodeFile(self.FILE_O)
 
 
 class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
@@ -155,10 +155,10 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
         self.assertEquals(crc, crc_dec)
 
     def testEncoderDecoderE(self):
-        self._testEncoderDecoder(BaseTest.FILE_E)
+        self._testEncoderDecoder(self.FILE_E)
 
     def testEncoderDecoderO(self):
-        self._testEncoderDecoder(BaseTest.FILE_O)
+        self._testEncoderDecoder(self.FILE_O)
 
     def testEncoderClosed(self):
         encoder = yenc.Encoder(open('afile.out', 'wb'))
