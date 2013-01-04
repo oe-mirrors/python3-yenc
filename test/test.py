@@ -22,6 +22,7 @@
 ##=============================================================================
 
 import os
+import os.path
 import sys
 import time
 import logging
@@ -47,9 +48,10 @@ class BaseTest(object):
     def tearDown(self):
         os.unlink(self.FILE_E)
         os.unlink(self.FILE_O)
-        for x in os.listdir('.'):
-            if x.endswith('.out') or x.endswith('.dec'):
-                os.unlink(x)
+        for basename in (self.FILE_E, self.FILE_O):
+            for x in ('.out', '.dec'):
+                if os.path.exists(basename + x):
+                    os.unlink(basename + x)
 
     def _readFile(self, filename):
         file_in = open(filename, 'rb')
