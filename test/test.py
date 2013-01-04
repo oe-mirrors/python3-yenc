@@ -26,6 +26,7 @@ import os.path
 import sys
 import time
 import logging
+import tempfile
 import unittest
 from binascii import crc32
 from stat import *
@@ -38,16 +39,21 @@ BLOCK_SIZE = 4096
 
 class BaseTest(object):
     CMD_DATA = "dd if=/dev/urandom of=%s bs=1b count=%d" 
-    FILE_E = 'sampledata_e'
-    FILE_O = 'sampledata_o'
 
     def setUp(self):
+        self.open_file_e = tempfile.NamedTemporaryFile()
+        self.open_file_o = tempfile.NamedTemporaryFile()
+
+        self.FILE_E = self.open_file_e.name
+        self.FILE_O = self.open_file_o.name
+
         os.system(self.CMD_DATA % (self.FILE_E, 128))
         os.system(self.CMD_DATA % (self.FILE_O, 129))
 
     def tearDown(self):
-        os.unlink(self.FILE_E)
-        os.unlink(self.FILE_O)
+        self.open_file_e.close()
+        self.open_file_o.close()
+
         for basename in (self.FILE_E, self.FILE_O):
             for x in ('.out', '.dec'):
                 if os.path.exists(basename + x):
