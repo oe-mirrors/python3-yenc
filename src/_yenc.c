@@ -279,7 +279,7 @@ PyObject* encode_string(
 {
 	PyObject *Py_input_string;
 	PyObject *Py_output_string;
-	PyObject *retval;
+	PyObject *retval = NULL;
 	
 	Byte *input_buffer = NULL;
 	Byte *output_buffer = NULL;
@@ -305,13 +305,18 @@ PyObject* encode_string(
 	input_len = PyString_Size(Py_input_string);
 	input_buffer = (Byte *) PyString_AsString(Py_input_string);
 	output_buffer = (Byte *) malloc((2 * input_len / LINESIZE + 1) * (LINESIZE + 2));
+	if(!output_buffer)
+		return PyErr_NoMemory();
 	output_len = encode_buffer(input_buffer, output_buffer, input_len, &crc, &col);
 	Py_output_string = PyString_FromStringAndSize((char *)output_buffer, output_len);
-	retval = Py_BuildValue("(S,L,i)", Py_output_string, (long long)crc.crc, col);
+	if(!Py_output_string)
+		goto out;
 
-	free(output_buffer);
+	retval = Py_BuildValue("(S,L,i)", Py_output_string, (long long)crc.crc, col);
 	Py_DECREF(Py_output_string);
 	
+out:
+	free(output_buffer);
 	return retval;
 }
 
@@ -379,7 +384,7 @@ PyObject* decode_string(
 {
 	PyObject *Py_input_string;
 	PyObject *Py_output_string;
-	PyObject *retval;
+	PyObject *retval = NULL;
 	
 	Byte *input_buffer = NULL;
 	Byte *output_buffer = NULL;
@@ -404,13 +409,18 @@ PyObject* decode_string(
 	input_len = PyString_Size(Py_input_string);
 	input_buffer = (Byte *)PyString_AsString(Py_input_string);
 	output_buffer = (Byte *)malloc( input_len );
+	if(!output_buffer)
+		return PyErr_NoMemory();
 	output_len = decode_buffer(input_buffer, output_buffer, input_len, &crc, &escape);
 	Py_output_string = PyString_FromStringAndSize((char *)output_buffer, output_len);
-	retval = Py_BuildValue("(S,L,i)", Py_output_string, (long long)crc.crc, escape);
-	
-	free(output_buffer);
-	Py_DECREF(Py_output_string);
+	if(!Py_output_string)
+		goto out;
 
+	retval = Py_BuildValue("(S,L,i)", Py_output_string, (long long)crc.crc, escape);
+	Py_DECREF(Py_output_string);
+	
+out:
+	free(output_buffer);
 	return retval;
 }
 
