@@ -47,8 +47,8 @@ def _checkArgsType(file_in, file_out, bytez):
             raise Error("No. of bytes can't be negative", E_PARMS)
 	if type(file_in) == str:
 		if file_in == "-":
-			if bytez == 0: raise Error("No. of bytes is 0 or not \
-				specified while reading from stdin", E_PARMS)
+			if bytez == 0: raise Error("No. of bytes is 0 or not "
+				"specified while reading from stdin", E_PARMS)
 			file_in = sys.stdin
 		else: file_in = open(file_in,"rb")
 	if type(file_out) == str:
