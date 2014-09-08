@@ -42,10 +42,10 @@ Version 0.4 is meant to be backward compatible with both 0.3 and 0.2.
 
 Requirements:
 ------------
-A C developement environment, Python>=2.6 and python development libs (look for 
+A C developement environment, Python>=2.7 or 3.1, and python development libs (look for 
 python-dev or something like that if you're using .rpm or .deb packages, if you 
 installed from sources you already have everything you need).
-The module is known to work with Python2.6, testing with other version is needed.
+The module is known to work with Python 2.7 and 3.4; testing with other version is needed.
 
 
 Installation:
