@@ -71,13 +71,13 @@ class TestLowLevel(unittest.TestCase):
 
     def testEncode(self):
         e, c, z = _yenc.encode_string('Hello world!')
-        self.assertEquals(e, 'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
-        self.assertEquals(c, 3833259626L)
+        self.assertEqual(e, 'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
+        self.assertEqual(c, 3833259626L)
 
     def testDecode(self):
         d, c, x = _yenc.decode_string('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
-        self.assertEquals(d, 'Hello world!')
-        self.assertEquals(c, 3833259626L)
+        self.assertEqual(d, 'Hello world!')
+        self.assertEqual(c, 3833259626L)
 
 
 class TestFileFunctions(BaseTest, unittest.TestCase):
@@ -89,7 +89,7 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
 
         bytes_out, crc_out = yenc.encode(file_in, file_out, len(data))
 
-        self.assertEquals(crc, crc_out)
+        self.assertEqual(crc, crc_out)
 
 
     def testEncodeE(self):
@@ -111,7 +111,7 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
         file_out = open(filename + ".dec", 'wb')
         bytes_dec, crc_dec = yenc.decode(file_in, file_out)
 
-        self.assertEquals(crc, crc_dec)
+        self.assertEqual(crc, crc_dec)
 
     def testDecodeE(self):
         self._testDecodeFile(self.FILE_E)
@@ -153,7 +153,7 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
         file_in.close()
         encoder.terminate()
         logging.info("orig: %s enc: %s" %(crc, encoder.getCrc32()))
-        self.assertEquals(crc, encoder.getCrc32())
+        self.assertEqual(crc, encoder.getCrc32())
 
         # deleting forces files to be flushed
         del encoder
@@ -169,15 +169,15 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
         file_in.close()
         decoder.flush()
         logging.info("orig: %s dec: %s" %(crc, decoder.getCrc32()))
-        self.assertEquals(crc, decoder.getCrc32())
+        self.assertEqual(crc, decoder.getCrc32())
 
         # deleting forces files to be flushed
         # if __del__ is not called further tests are going to fail
         del decoder
 
         data_dec, crc_dec = self._readFile(filename + '.dec')
-        self.assertEquals(file_data, data_dec)
-        self.assertEquals(crc, crc_dec)
+        self.assertEqual(file_data, data_dec)
+        self.assertEqual(crc, crc_dec)
 
     def testEncoderDecoderE(self):
         self._testEncoderDecoder(self.FILE_E)
@@ -211,8 +211,8 @@ class TestEncoderDecoderInMemory(unittest.TestCase):
         """
         encoder = yenc.Encoder()
         encoder.feed('Hello world!')
-        self.assertEquals('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK', encoder.getEncoded())
-        self.assertEquals(encoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
+        self.assertEqual('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK', encoder.getEncoded())
+        self.assertEqual(encoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
 
     def testEncodeAndWriteInMemory(self):
         pass
@@ -220,8 +220,8 @@ class TestEncoderDecoderInMemory(unittest.TestCase):
     def testDecodeInMemory(self):
         decoder = yenc.Decoder()
         decoder.feed('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
-        self.assertEquals("Hello world!", decoder.getDecoded())
-        self.assertEquals(decoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
+        self.assertEqual("Hello world!", decoder.getDecoded())
+        self.assertEqual(decoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
 
     def testDecodeAndWriteInMemory(self):
         pass
