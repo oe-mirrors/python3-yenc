@@ -58,7 +58,7 @@ def main():
             file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
             try:
                 encoded, crc_out = yenc.encode(file_in, file_out, size)
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("{}\n".format(e))
                 sys.exit(3)
         file_out.write("=yend size=%d crc32=%s\r\n" % (encoded, crc_out))

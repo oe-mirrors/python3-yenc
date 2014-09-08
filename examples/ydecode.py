@@ -57,7 +57,7 @@ def main():
         with open(name,"wb") as file_out:
             try:
                 dec, dec_crc = yenc.decode(file_in, file_out, size)
-            except yenc.Error, e:
+            except yenc.Error as e:
                 sys.stderr.write(str(e) + '\n')
                 sys.exit(1)
         garbage	= False
