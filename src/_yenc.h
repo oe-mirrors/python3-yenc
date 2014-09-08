@@ -52,7 +52,7 @@
 #define E_EOF 		2
 #define E_IO		3
 
-#define E_MODE_MSG	"Invalide mode for '*file' arguments"
+#define E_MODE_MSG	"Invalid mode for '*file' arguments"
 #define E_IO_MSG	"I/O Error"
 
 #define _DDEBUG_

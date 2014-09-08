@@ -42,7 +42,7 @@ Version 0.4 is meant to be backward compatible with both 0.3 and 0.2.
 
 Requirements:
 ------------
-A C developement environment, Python>=2.6 and python developement libs (look for 
+A C developement environment, Python>=2.6 and python development libs (look for 
 python-dev or something like that if you're using .rpm or .deb packages, if you 
 installed from sources you already have everything you need).
 The module is known to work with Python2.6, testing with other version is needed.
@@ -100,8 +100,8 @@ Same as encode (of course it does the inverse job). Exceptions are raised when
 output can't be written or calculated crc doesn't match the optional crc_in 
 argument (useful for writing decoding tools).
 
-CRC32 sums are always represented as lowercase strings, whithout any
-preceeding simbol (like '0x').
+CRC32 sums are always represented as lowercase strings, without any
+preceeding symbol (like '0x').
 
 
 Decoder and Encoder:

@@ -59,7 +59,7 @@ def _checkArgsType(file_in, file_out, bytez):
 
 def encode(file_in, file_out, bytez=0):
 	"""	encode(file_in, file_out, bytez=0): write "bytez" encoded bytes from
-		file_in to file_out, if "bytez" is 0 encodes bytez until EOF.
+		file_in to file_out, if "bytez" is 0 encodes bytes until EOF.
 	"""
 	file_in, file_out, bytez = _checkArgsType(file_in, file_out, bytez)
 	encoded, crc32 = _yenc.encode(file_in, file_out, bytez)
