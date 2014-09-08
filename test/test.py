@@ -224,7 +224,11 @@ class TestEncoderDecoderInMemory(unittest.TestCase):
     def testDecodeFlushInMemory(self):
         decoder = yenc.Decoder()
         self.assertRaises(ValueError, decoder.flush)
-    
+
+
+class TestMisc(unittest.TestCase):
+    def testError(self):
+        format(yenc.Error())
 
 
 if __name__ == "__main__":
