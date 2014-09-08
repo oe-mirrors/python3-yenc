@@ -34,11 +34,15 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "o:")
     except getopt.GetoptError:
         usage()
-    file_out = sys.stdout
+    file_out = None
     for o,a in opts:
         if o == '-o':
             file_out = open(a,"wb")
-    if file_out is sys.stdout:
+    if not file_out:
+        try:  # Python 3
+            file_out = sys.stdout.detach()
+        except AttributeError:  # Python < 3
+            file_out = sys.stdout
         sys.stdout = None
     with file_out:
         if args:
@@ -55,13 +59,15 @@ def main():
                 crc = "%08x"%(0xFFFFFFFF & crc32(file.read())) 
             name = os.path.split(filename)[1]
             size = os.stat(filename)[ST_SIZE]
-            file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
+            line = "=ybegin line=128 size=%d crc32=%s name=%s\r\n"
+            file_out.write((line % (size, crc, name)).encode("ascii"))
             try:
                 encoded, crc_out = yenc.encode(file_in, file_out, size)
             except Exception as e:
                 sys.stderr.write("{}\n".format(e))
                 sys.exit(3)
-        file_out.write("=yend size=%d crc32=%s\r\n" % (encoded, crc_out))
+        line = "=yend size=%d crc32=%s\r\n" % (encoded, crc_out)
+        file_out.write(line.encode("ascii"))
 
 def usage():
     sys.stderr.write("Usage: yencode.py <-o outfile> filename\n")

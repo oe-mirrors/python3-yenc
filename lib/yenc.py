@@ -21,7 +21,7 @@
 
 
 import sys
-from cStringIO import StringIO
+from io import BytesIO
 import _yenc
 from contextlib import contextmanager
 
@@ -54,12 +54,19 @@ def _checkArgsType(file_in, file_out, bytez):
             if file_in == "-":
                 if bytez == 0: raise Error("No. of bytes is 0 or not "
                     "specified while reading from stdin", E_PARMS)
-                file_in = sys.stdin
+                try:  # Python 3
+                    file_in = sys.stdin.buffer
+                except AttributeError:  # Python < 3
+                    file_in = sys.stdin
             else:
                 opened_in = open(file_in,"rb")
                 file_in = opened_in
         if type(file_out) == str:
-            if file_out == "-": file_out = sys.stdout
+            if file_out == "-":
+                try:  # Python 3
+                    file_out = sys.stdout.buffer
+                except AttributeError:  # Python < 3
+                    file_out = sys.stdout
             else:
                 opened_out = open(file_out,"wb")
                 file_out = opened_out
@@ -100,7 +107,7 @@ class Encoder:
         and close() will flush and close the file. After close() further calls to feed() will fail.
     """
     def __init__(self, output_file = None):
-        self._buffer = StringIO()
+        self._buffer = BytesIO()
         self._column = 0
         self._output_file = output_file
         self._crc = BIN_MASK
@@ -128,7 +135,7 @@ class Encoder:
         """	Appends the terminal CRLF sequence to the encoded data.
             Further calls to feed() will fail.
         """
-        self._buffer.write("\r\n")
+        self._buffer.write(b"\r\n")
         self._feedable = False
     
     def flush(self):
@@ -138,7 +145,7 @@ class Encoder:
             raise ValueError("Output file is 'None'")
 
         self._output_file.write(self._buffer.getvalue())
-        self._buffer = StringIO()
+        self._buffer = BytesIO()
 
     def close(self):
         """     Flushes and closes output_file.
@@ -178,7 +185,7 @@ class Decoder:
         and close() will flush and close the file. After close() further calls to feed() will fail.
     """
     def __init__(self, output_file = None):
-        self._buffer = StringIO()
+        self._buffer = BytesIO()
         self._escape = 0
         self._output_file = output_file
         self._crc = BIN_MASK
@@ -210,7 +217,7 @@ class Decoder:
             raise ValueError("Output file is 'None'")
 
         self._output_file.write(self._buffer.getvalue())
-        self._buffer = StringIO()
+        self._buffer = BytesIO()
 
     def close(self):
         """     Flushes and closes output_file.

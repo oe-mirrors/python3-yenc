@@ -27,22 +27,25 @@ import re
 
 import yenc
 
-NAME_RE 	= re.compile(r"^.*? name=(.+?)\r\n$")
-LINE_RE 	= re.compile(r"^.*? line=(\d{3}) .*$")
-SIZE_RE 	= re.compile(r"^.*? size=(\d+) .*$")
-CRC32_RE	= re.compile(r"^.*? crc32=(\w+)")
+NAME_RE 	= re.compile(br"^.*? name=(.+?)\r\n$")
+LINE_RE 	= re.compile(br"^.*? line=(\d{3}) .*$")
+SIZE_RE 	= re.compile(br"^.*? size=(\d+) .*$")
+CRC32_RE	= re.compile(br"^.*? crc32=(\w+)")
 
 def main():
-    head_crc = trail_crc = ""
+    head_crc = trail_crc = None
     if len(sys.argv) > 1:
         file_in = open(sys.argv[1],"rb")
     else:
-        file_in	= sys.stdin
+        try:  # Python 3
+            file_in	= sys.stdin.detach()
+        except:  # Python < 3
+            file_in	= sys.stdin
         sys.stdin = None
     with file_in:
         while True:
             line = file_in.readline()
-            if line.startswith("=ybegin "):
+            if line.startswith(b"=ybegin "):
                 try:
                     name, size = NAME_RE.match(line).group(1), int(SIZE_RE.match(line).group(1))
                     m_obj = CRC32_RE.match(line)
@@ -57,11 +60,11 @@ def main():
                 sys.exit(1)
         file_out = open(name,"wb")
         dec = yenc.Decoder(file_out)
-        trailer = ""
+        trailer = None
         garbage = False
         while True:
             data = file_in.readline()
-            if data.startswith("=yend"):
+            if data.startswith(b"=yend"):
                 trailer = data
                 break
             elif dec.getSize() >= size:
@@ -82,9 +85,9 @@ def main():
     if garbage:
         sys.stderr.write("warning: garbage before =yend trailer\n")
     if head_crc:
-        tmp_crc = head_crc.lower()
+        tmp_crc = head_crc.decode("ascii").lower()
     elif trail_crc:
-        tmp_crc = trail_crc.lower()
+        tmp_crc = trail_crc.decode("ascii").lower()
     else:
         sys.exit(0)
 #    sys.stderr.write("comparing\n")

@@ -67,13 +67,13 @@ class BaseTest(unittest.TestCase):
 class TestLowLevel(unittest.TestCase):
 
     def testEncode(self):
-        e, c, z = _yenc.encode_string('Hello world!')
-        self.assertEqual(e, 'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
+        e, c, z = _yenc.encode_string(b'Hello world!')
+        self.assertEqual(e, b'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
         self.assertEqual(c, 3833259626)
 
     def testDecode(self):
-        d, c, x = _yenc.decode_string('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
-        self.assertEqual(d, 'Hello world!')
+        d, c, x = _yenc.decode_string(b'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
+        self.assertEqual(d, b'Hello world!')
         self.assertEqual(c, 3833259626)
 
 
@@ -181,19 +181,19 @@ class TestEncoderDecoderOnFile(BaseTest):
 
     def testEncoderClosed(self):
         encoder = yenc.Encoder(open('afile.out', 'wb'))
-        encoder.feed('some data')
+        encoder.feed(b'some data')
         encoder.close()
         self.assertFalse(encoder._output_file)
-        self.assertRaises(IOError, encoder.feed, 'some data')
+        self.assertRaises(IOError, encoder.feed, b'some data')
  
     def testEncoderTerminated(self):
         encoder = yenc.Encoder(open('afile.out', 'wb'))
         encoder.terminate()
-        self.assertRaises(IOError, encoder.feed, 'some data')
+        self.assertRaises(IOError, encoder.feed, b'some data')
 
     def testDecoderClose(self):
         decoder = yenc.Decoder(open('afile.out', 'wb'))
-        decoder.feed('some data')
+        decoder.feed(b'some data')
         decoder.close()
         self.assertFalse(decoder._output_file)
 
@@ -204,18 +204,18 @@ class TestEncoderDecoderInMemory(unittest.TestCase):
         """ Checks simple encoding in memory
         """
         encoder = yenc.Encoder()
-        encoder.feed('Hello world!')
-        self.assertEqual('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK', encoder.getEncoded())
-        self.assertEqual(encoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
+        encoder.feed(b'Hello world!')
+        self.assertEqual(b'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK', encoder.getEncoded())
+        self.assertEqual(encoder.getCrc32(), "%08x" % (crc32(b"Hello world!") & 0xffffffff))
 
     def testEncodeAndWriteInMemory(self):
         pass
 
     def testDecodeInMemory(self):
         decoder = yenc.Decoder()
-        decoder.feed('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
-        self.assertEqual("Hello world!", decoder.getDecoded())
-        self.assertEqual(decoder.getCrc32(), "%08x" % (crc32("Hello world!") & 0xffffffff))
+        decoder.feed(b'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
+        self.assertEqual(b"Hello world!", decoder.getDecoded())
+        self.assertEqual(decoder.getCrc32(), "%08x" % (crc32(b"Hello world!") & 0xffffffff))
 
     def testDecodeAndWriteInMemory(self):
         pass
