@@ -32,6 +32,7 @@ SIZE_RE 	= re.compile(r"^.*? size=(\d+) .*$")
 CRC32_RE	= re.compile(r"^.*? crc32=(\w+)")
 
 def main():
+	head_crc = trail_crc = tmp_crc = ""
 	if len(sys.argv) > 1:
 		file_in = open(sys.argv[1],"rb")
 	else:
@@ -57,7 +58,6 @@ def main():
 	except yenc.Error, e:
 		sys.stderr.write(str(e) + '\n')
 		sys.exit(1)
-	head_crc = trail_crc = tmp_crc = ""
 	garbage	= 0
 	for line in file_in.read().split("\r\n"):
 		if line.startswith("=yend "):
