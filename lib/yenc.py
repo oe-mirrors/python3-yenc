@@ -73,7 +73,7 @@ def decode(file_in, file_out, bytez=0, crc_in=""):
 	file_in, file_out, bytez = _checkArgsType(file_in, file_out, bytez)
 	decoded, crc32 = _yenc.decode(file_in, file_out, bytez)
 	crc_hex = "%08x" % (crc32 ^ BIN_MASK)
-	if crc_in and not cmp(crc_hex, crc_in.lower()):
+	if crc_in and crc_hex != crc_in.lower():
 		raise Error("crc32 error", E_CRC32)
 	else:
 		return decoded, crc_hex

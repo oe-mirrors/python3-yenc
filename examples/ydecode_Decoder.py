@@ -86,7 +86,7 @@ def main():
 	else:
 		sys.exit(0)
 #	print "comparing"
-	if cmp(tmp_crc, dec.getCrc32()):
+	if tmp_crc != dec.getCrc32():
 		sys.stderr.write("err: header: %s dec: %s CRC32 mismatch\n" % (tmp_crc,dec.getCrc32()) )
 		sys.exit(1)
 	else:

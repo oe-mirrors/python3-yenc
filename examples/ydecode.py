@@ -83,7 +83,7 @@ def main():
 		tmp_crc = trail_crc.lower()
 	else:
 		sys.exit(0)
-	if cmp(tmp_crc,dec_crc):
+	if tmp_crc != dec_crc:
 		sys.stderr.write("err: header: %s dec: %s CRC32 mismatch\n" % (tmp_crc,dec_crc) )
 		sys.exit(1)
 	else:
