@@ -118,6 +118,23 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
 
     def testDecodeO(self):
         self._testDecodeFile(self.FILE_O)
+    
+    def testCrcIn(self):
+        """Exercise yenc.decode(crc_in=...) parameter"""
+        with open(self.FILE_E, 'rb') as plain, \
+        open(self.FILE_E + ".out", 'w+b') as encoded, \
+        open(os.devnull, 'wb') as null:
+            _, crc = yenc.encode(plain, encoded)
+            
+            # Correct CRC
+            encoded.seek(0)
+            yenc.decode(encoded, null, crc_in=crc)
+            
+            # Incorrect CRC
+            crc = format(int(crc, 16) ^ 0xffffffff, "08x")
+            encoded.seek(0)
+            with self.assertRaises(yenc.Error):
+                yenc.decode(encoded, null, crc_in=crc)
 
 
 class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
