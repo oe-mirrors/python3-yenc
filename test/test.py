@@ -42,7 +42,9 @@ class BaseTest(unittest.TestCase):
 
     def setUp(self):
         self.open_file_e = tempfile.NamedTemporaryFile()
+        self.addCleanup(self.open_file_e.close)
         self.open_file_o = tempfile.NamedTemporaryFile()
+        self.addCleanup(self.open_file_o.close)
 
         self.FILE_E = self.open_file_e.name
         self.FILE_O = self.open_file_o.name
@@ -51,19 +53,14 @@ class BaseTest(unittest.TestCase):
         os.system(self.CMD_DATA % (self.FILE_O, 129))
 
     def tearDown(self):
-        self.open_file_e.close()
-        self.open_file_o.close()
-
         for basename in (self.FILE_E, self.FILE_O):
             for x in ('.out', '.dec'):
                 if os.path.exists(basename + x):
                     os.unlink(basename + x)
 
     def _readFile(self, filename):
-        file_in = open(filename, 'rb')
-
-        data = file_in.read()
-        file_in.close()
+        with open(filename, 'rb') as file_in:
+            data = file_in.read()
         return data, "%08x" % (crc32(data) & 0xffffffff)
 
 
@@ -142,14 +139,13 @@ class TestEncoderDecoderOnFile(BaseTest):
         file_data, crc =  self._readFile(filename)
 
         file_out = open(filename + '.out', 'wb')
-        file_in = open(filename, 'rb')
-        
         encoder = yenc.Encoder(file_out)
-        data = file_in.read(BLOCK_SIZE)
-        while len(data):
-            encoder.feed(data)
+        
+        with open(filename, 'rb') as file_in:
             data = file_in.read(BLOCK_SIZE)
-        file_in.close()
+            while len(data):
+                encoder.feed(data)
+                data = file_in.read(BLOCK_SIZE)
         encoder.terminate()
         logging.info("orig: %s enc: %s" %(crc, encoder.getCrc32()))
         self.assertEqual(crc, encoder.getCrc32())
@@ -157,15 +153,14 @@ class TestEncoderDecoderOnFile(BaseTest):
         # deleting forces files to be flushed
         del encoder
 
-        file_in = open(filename + '.out', 'rb')
         file_out = open(filename + '.dec', 'wb')
-
         decoder = yenc.Decoder(file_out)
-        data = file_in.read(BLOCK_SIZE)
-        while len(data) > 0:
-            decoder.feed(data)
+        
+        with open(filename + '.out', 'rb') as file_in:
             data = file_in.read(BLOCK_SIZE)
-        file_in.close()
+            while len(data) > 0:
+                decoder.feed(data)
+                data = file_in.read(BLOCK_SIZE)
         decoder.flush()
         logging.info("orig: %s dec: %s" %(crc, decoder.getCrc32()))
         self.assertEqual(crc, decoder.getCrc32())
