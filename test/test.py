@@ -84,10 +84,9 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
 
     def _testEncodeFile(self, filename):
         data, crc =  self._readFile(filename)
-        file_in = open(filename, 'rb')
-        file_out = open(filename + ".out", 'wb')
-
-        bytes_out, crc_out = yenc.encode(file_in, file_out, len(data))
+        with open(filename, 'rb') as file_in, \
+        open(filename + ".out", 'wb') as file_out:
+            bytes_out, crc_out = yenc.encode(file_in, file_out, len(data))
 
         self.assertEqual(crc, crc_out)
 
@@ -102,14 +101,14 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
 
     def _testDecodeFile(self, filename):
         data, crc =  self._readFile(filename)
-        file_in = open(filename, 'rb')
-        file_out = open(filename + ".out", 'wb')
+        
+        with open(filename, 'rb') as file_in, \
+        open(filename + ".out", 'wb') as file_out:
+            bytes_out, crc_out = yenc.encode(file_in, file_out, len(data))
 
-        bytes_out, crc_out = yenc.encode(file_in, file_out, len(data))
-
-        file_in = open(filename + ".out", 'rb')
-        file_out = open(filename + ".dec", 'wb')
-        bytes_dec, crc_dec = yenc.decode(file_in, file_out)
+        with open(filename + ".out", 'rb') as file_in, \
+        open(filename + ".dec", 'wb') as file_out:
+            bytes_dec, crc_dec = yenc.decode(file_in, file_out)
 
         self.assertEqual(crc, crc_dec)
 

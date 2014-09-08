@@ -38,25 +38,30 @@ def main():
     for o,a in opts:
         if o == '-o':
             file_out = open(a,"wb")
-    if args:
-        filename = args[0]
-        if os.access( filename, os.F_OK | os.R_OK ):
-            file_in = open(filename,"rb")
+    if file_out is sys.stdout:
+        sys.stdout = None
+    with file_out:
+        if args:
+            filename = args[0]
+            if os.access( filename, os.F_OK | os.R_OK ):
+                file_in = open(filename,"rb")
+            else:
+                sys.stderr.write("couldn't access %s\n" % filename)
+                sys.exit(2)
         else:
-            sys.stderr.write("couldn't access %s\n" % filename)
-            sys.exit(2)
-    else:
-        usage()
-    crc = "%08x"%(0xFFFFFFFF & crc32(open(filename,"rb").read())) 
-    name = os.path.split(filename)[1]
-    size = os.stat(filename)[ST_SIZE]
-    file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
-    try:
-        encoded, crc_out = yenc.encode(file_in, file_out, size)
-    except Exception, e:
-        sys.stderr.write("{}\n".format(e))
-        sys.exit(3)
-    file_out.write("=yend size=%d crc32=%s\r\n" % (encoded, crc_out))
+            usage()
+        with file_in:
+            with open(filename,"rb") as file:
+                crc = "%08x"%(0xFFFFFFFF & crc32(file.read())) 
+            name = os.path.split(filename)[1]
+            size = os.stat(filename)[ST_SIZE]
+            file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
+            try:
+                encoded, crc_out = yenc.encode(file_in, file_out, size)
+            except Exception, e:
+                sys.stderr.write("{}\n".format(e))
+                sys.exit(3)
+        file_out.write("=yend size=%d crc32=%s\r\n" % (encoded, crc_out))
 
 def usage():
     sys.stderr.write("Usage: yencode.py <-o outfile> filename\n")

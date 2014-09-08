@@ -45,17 +45,18 @@ def main():
             sys.exit(2)
     else:
         usage()
-    crc = "%x"%(0xFFFFFFFF & crc32( open(filename,"rb").read()))
+    with open(filename,"rb") as file_in:
+        crc = "%x"%(0xFFFFFFFF & crc32(file_in.read()))
     name = os.path.split(filename)[1]
     size = os.stat(filename)[ST_SIZE]
     file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
-    file_in = open(filename, "rb")
-    encoder = yenc.Encoder(file_out)
-    while True:
-        data_in = file_in.read(1024)
-        encoder.feed(data_in)
-        encoder.flush()
-        if len(data_in) < 1024: break
+    with open(filename, "rb") as file_in:
+        encoder = yenc.Encoder(file_out)
+        while True:
+            data_in = file_in.read(1024)
+            encoder.feed(data_in)
+            encoder.flush()
+            if len(data_in) < 1024: break
     encoder.terminate()
     encoder.flush()
     file_out.write("=yend size=%d crc32=%s\r\n" % (size, encoder.getCrc32()) )

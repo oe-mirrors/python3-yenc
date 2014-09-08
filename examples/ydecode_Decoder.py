@@ -38,35 +38,37 @@ def main():
         file_in = open(sys.argv[1],"rb")
     else:
         file_in	= sys.stdin
-    while True:
-        line = file_in.readline()
-        if line.startswith("=ybegin "):
-            try:
-                name, size = NAME_RE.match(line).group(1), int(SIZE_RE.match(line).group(1))
-                m_obj = CRC32_RE.match(line)
-                if m_obj:
-                    head_crc = m_obj.group(1)
-            except re.error:
-                sys.stderr.write("err-critical: malformed =ybegin header\n")
+        sys.stdin = None
+    with file_in:
+        while True:
+            line = file_in.readline()
+            if line.startswith("=ybegin "):
+                try:
+                    name, size = NAME_RE.match(line).group(1), int(SIZE_RE.match(line).group(1))
+                    m_obj = CRC32_RE.match(line)
+                    if m_obj:
+                        head_crc = m_obj.group(1)
+                except re.error:
+                    sys.stderr.write("err-critical: malformed =ybegin header\n")
+                    sys.exit(1)
+                break
+            elif not line:
+                sys.stderr.write("err-critical: no valid =ybegin header found\n")
                 sys.exit(1)
-            break
-        elif not line:
-            sys.stderr.write("err-critical: no valid =ybegin header found\n")
-            sys.exit(1)
-    file_out = open(name,"wb")
-    dec = yenc.Decoder(file_out)
-    trailer = ""
-    garbage = False
-    while True:
-        data = file_in.readline()
-        if data.startswith("=yend"):
-            trailer = data
-            break
-        elif dec.getSize() >= size:
-            garbage = True
-        else:
-            dec.feed(data)
-            dec.flush()
+        file_out = open(name,"wb")
+        dec = yenc.Decoder(file_out)
+        trailer = ""
+        garbage = False
+        while True:
+            data = file_in.readline()
+            if data.startswith("=yend"):
+                trailer = data
+                break
+            elif dec.getSize() >= size:
+                garbage = True
+            else:
+                dec.feed(data)
+                dec.flush()
     if trailer:
         try:	
             size = int(SIZE_RE.match(trailer).group(1))

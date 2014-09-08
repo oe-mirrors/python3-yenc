@@ -23,6 +23,7 @@
 import sys
 from cStringIO import StringIO
 import _yenc
+from contextlib import contextmanager
 
 E_ERROR		= 64
 E_CRC32		= 65
@@ -40,29 +41,42 @@ class Error(Exception):
         return "yenc.Error: %s\n" % self.value
 
 
+@contextmanager
 def _checkArgsType(file_in, file_out, bytez):
     """ 	Internal checkings, not to be used from outside this module.
     """
     if bytez < 0: 
         raise Error("No. of bytes can't be negative", E_PARMS)
-    if type(file_in) == str:
-        if file_in == "-":
-            if bytez == 0: raise Error("No. of bytes is 0 or not "
-                "specified while reading from stdin", E_PARMS)
-            file_in = sys.stdin
-        else: file_in = open(file_in,"rb")
-    if type(file_out) == str:
-        if file_out == "-": file_out = sys.stdout
-        else: file_out = open(file_out,"wb")
-    return file_in, file_out, bytez
+    opened_in = None
+    opened_out = None
+    try:
+        if type(file_in) == str:
+            if file_in == "-":
+                if bytez == 0: raise Error("No. of bytes is 0 or not "
+                    "specified while reading from stdin", E_PARMS)
+                file_in = sys.stdin
+            else:
+                opened_in = open(file_in,"rb")
+                file_in = opened_in
+        if type(file_out) == str:
+            if file_out == "-": file_out = sys.stdout
+            else:
+                opened_out = open(file_out,"wb")
+                file_out = opened_out
+        yield file_in, file_out, bytez
+    finally:
+        if opened_out:
+            opened_out.close()
+        if opened_in:
+            opened_in.close()
 
 
 def encode(file_in, file_out, bytez=0):
     """	encode(file_in, file_out, bytez=0): write "bytez" encoded bytes from
         file_in to file_out, if "bytez" is 0 encodes bytes until EOF.
     """
-    file_in, file_out, bytez = _checkArgsType(file_in, file_out, bytez)
-    encoded, crc32 = _yenc.encode(file_in, file_out, bytez)
+    with _checkArgsType(file_in, file_out, bytez) as [file_in, file_out, bytez]:
+        encoded, crc32 = _yenc.encode(file_in, file_out, bytez)
     return encoded, "%08x" % (crc32 ^ BIN_MASK)
 
 
@@ -70,8 +84,8 @@ def decode(file_in, file_out, bytez=0, crc_in=""):
     """ 	decode(file_in, file_out, bytez=0): write "bytez" decoded bytes from
         file_in to file_out, if "bytez" is 0 decodes bytes until EOF.
     """
-    file_in, file_out, bytez = _checkArgsType(file_in, file_out, bytez)
-    decoded, crc32 = _yenc.decode(file_in, file_out, bytez)
+    with _checkArgsType(file_in, file_out, bytez) as [file_in, file_out, bytez]:
+        decoded, crc32 = _yenc.decode(file_in, file_out, bytez)
     crc_hex = "%08x" % (crc32 ^ BIN_MASK)
     if crc_in and crc_hex != crc_in.lower():
         raise Error("crc32 error", E_CRC32)
