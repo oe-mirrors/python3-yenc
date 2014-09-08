@@ -64,7 +64,7 @@ class BaseTest(object):
 
         data = file_in.read()
         file_in.close()
-        return data, "%08x" % (crc32(data) & 0xffffffffL)
+        return data, "%08x" % (crc32(data) & 0xffffffff)
 
 
 class TestLowLevel(unittest.TestCase):
@@ -72,12 +72,12 @@ class TestLowLevel(unittest.TestCase):
     def testEncode(self):
         e, c, z = _yenc.encode_string('Hello world!')
         self.assertEqual(e, 'r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
-        self.assertEqual(c, 3833259626L)
+        self.assertEqual(c, 3833259626)
 
     def testDecode(self):
         d, c, x = _yenc.decode_string('r\x8f\x96\x96\x99J\xa1\x99\x9c\x96\x8eK')
         self.assertEqual(d, 'Hello world!')
-        self.assertEqual(c, 3833259626L)
+        self.assertEqual(c, 3833259626)
 
 
 class TestFileFunctions(BaseTest, unittest.TestCase):

@@ -37,7 +37,7 @@ def main():
         file_in = open(sys.argv[1],"rb")
     else:
         file_in	= sys.stdin
-    while 1:
+    while True:
         line = file_in.readline()
         if line.startswith("=ybegin "):
             try:
@@ -58,7 +58,7 @@ def main():
     except yenc.Error, e:
         sys.stderr.write(str(e) + '\n')
         sys.exit(1)
-    garbage	= 0
+    garbage	= False
     for line in file_in.read().split("\r\n"):
         if line.startswith("=yend "):
             try:	
@@ -72,7 +72,7 @@ def main():
         elif not line:
             continue
         else:
-            garbage = 1
+            garbage = True
     else:
         sys.stderr.write("warning: couldn't find =yend trailer\n")
     if garbage:

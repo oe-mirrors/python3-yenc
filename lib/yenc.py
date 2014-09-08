@@ -28,7 +28,7 @@ E_ERROR		= 64
 E_CRC32		= 65
 E_PARMS		= 66
 
-BIN_MASK        = 0xffffffffL
+BIN_MASK        = 0xffffffff
 
 class Error(Exception):
     """ 	Class for specific yenc errors

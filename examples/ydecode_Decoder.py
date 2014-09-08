@@ -38,7 +38,7 @@ def main():
         file_in = open(sys.argv[1],"rb")
     else:
         file_in	= sys.stdin
-    while 1:
+    while True:
         line = file_in.readline()
         if line.startswith("=ybegin "):
             try:
@@ -56,14 +56,14 @@ def main():
     file_out = open(name,"wb")
     dec = yenc.Decoder(file_out)
     trailer = ""
-    garbage = 0
+    garbage = False
     while True:
         data = file_in.readline()
         if data.startswith("=yend"):
             trailer = data
             break
         elif dec.getSize() >= size:
-            garbage = 1
+            garbage = True
         else:
             dec.feed(data)
             dec.flush()
