@@ -37,7 +37,7 @@ class Error(Exception):
 		self.value = value
 		
 	def __str__(self):
-		return "yenc.Error: %s\n" % self.value, self.value
+		return "yenc.Error: %s\n" % self.value
 
 
 def _checkArgsType(file_in, file_out, bytez):
