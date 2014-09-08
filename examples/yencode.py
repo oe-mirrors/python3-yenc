@@ -30,38 +30,37 @@ from stat import *
 from binascii import crc32
 
 def main():
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], "o:")
-	except getopt.GetoptError:
-		usage()
-	file_out = sys.stdout
-	for o,a in opts:
-		if o == '-o':
-			file_out = open(a,"wb")
-	if args:
-		filename = args[0]
-		if os.access( filename, os.F_OK | os.R_OK ):
-			file_in = open(filename,"rb")
-		else:
-			print "couldn't access %s" % filename
-			sys.exit(2)
-	else:
-		usage()
-	crc = "%08x"%(0xFFFFFFFF & crc32(open(filename,"rb").read())) 
-	name = os.path.split(filename)[1]
-	size = os.stat(filename)[ST_SIZE]
-	file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
-	try:
-		encoded, crc_out = yenc.encode(file_in, file_out, size)
-	except Exception, e:
-		print e
-		sys.exit(3)
-	file_out.write("=yend size=%d crc32=%s\r\n" % (encoded, crc_out))
-	
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "o:")
+    except getopt.GetoptError:
+        usage()
+    file_out = sys.stdout
+    for o,a in opts:
+        if o == '-o':
+            file_out = open(a,"wb")
+    if args:
+        filename = args[0]
+        if os.access( filename, os.F_OK | os.R_OK ):
+            file_in = open(filename,"rb")
+        else:
+            print "couldn't access %s" % filename
+            sys.exit(2)
+    else:
+        usage()
+    crc = "%08x"%(0xFFFFFFFF & crc32(open(filename,"rb").read())) 
+    name = os.path.split(filename)[1]
+    size = os.stat(filename)[ST_SIZE]
+    file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
+    try:
+        encoded, crc_out = yenc.encode(file_in, file_out, size)
+    except Exception, e:
+        print e
+        sys.exit(3)
+    file_out.write("=yend size=%d crc32=%s\r\n" % (encoded, crc_out))
 
 def usage():
-	print "Usage: yencode.py <-o outfile> filename"
-	sys.exit(1)
-	
+    print "Usage: yencode.py <-o outfile> filename"
+    sys.exit(1)
+
 if __name__ == "__main__":
-	main()
+    main()

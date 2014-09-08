@@ -30,42 +30,41 @@ from stat import *
 from binascii import crc32
 
 def main():
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], "o:")
-	except getopt.GetoptError:
-		usage()
-	file_out = sys.stdout
-	for o,a in opts:
-		if o == '-o':
-			file_out = open(a,"wb")
-	if args:
-		filename = args[0]
-		if os.access( filename, os.F_OK | os.R_OK ):
-			file_in = open(filename,"rb")
-		else:
-			print "couldn't access %s" % filename
-			sys.exit(2)
-	else:
-		usage()
-	crc = "%x"%(0xFFFFFFFF & crc32( open(filename,"rb").read()))
-	name = os.path.split(filename)[1]
-	size = os.stat(filename)[ST_SIZE]
-	file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
-	file_in = open(filename, "rb")
-	encoder = yenc.Encoder(file_out)
-	while True:
-		data_in = file_in.read(1024)
-		encoder.feed(data_in)
-		encoder.flush()
-		if len(data_in) < 1024: break
-	encoder.terminate()
-	encoder.flush()
-	file_out.write("=yend size=%d crc32=%s\r\n" % (size, encoder.getCrc32()) )
-	
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "o:")
+    except getopt.GetoptError:
+        usage()
+    file_out = sys.stdout
+    for o,a in opts:
+        if o == '-o':
+            file_out = open(a,"wb")
+    if args:
+        filename = args[0]
+        if os.access( filename, os.F_OK | os.R_OK ):
+            file_in = open(filename,"rb")
+        else:
+            print "couldn't access %s" % filename
+            sys.exit(2)
+    else:
+        usage()
+    crc = "%x"%(0xFFFFFFFF & crc32( open(filename,"rb").read()))
+    name = os.path.split(filename)[1]
+    size = os.stat(filename)[ST_SIZE]
+    file_out.write("=ybegin line=128 size=%d crc32=%s name=%s\r\n" % (size, crc, name) )
+    file_in = open(filename, "rb")
+    encoder = yenc.Encoder(file_out)
+    while True:
+        data_in = file_in.read(1024)
+        encoder.feed(data_in)
+        encoder.flush()
+        if len(data_in) < 1024: break
+    encoder.terminate()
+    encoder.flush()
+    file_out.write("=yend size=%d crc32=%s\r\n" % (size, encoder.getCrc32()) )
 
 def usage():
-	print "Usage: yencode_Encoder.py <-o outfile> filename"
-	sys.exit(1)
-	
+    print "Usage: yencode_Encoder.py <-o outfile> filename"
+    sys.exit(1)
+
 if __name__ == "__main__":
-	main()
+    main()

@@ -24,32 +24,32 @@
 from distutils.core import setup, Extension
 
 setup(	
-	name		 = "yenc",
-	version		 = "0.4.0",
-	author		 = "Alessandro Duca",
-	author_email	 = "alessandro.duca@gmail.com",
-        url		 = "https://bitbucket.org/dual75/yenc",
-	license		 = "LGPL",
-        platforms        = ["Unix"],
-	package_dir	 = { '': 'lib' },
-	py_modules	 = ["yenc"],
-	ext_modules	 = [Extension("_yenc",["src/_yenc.c"],extra_compile_args=["-O2","-g"])],
-        classifiers      = [
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 2.5",
-            "Programming Language :: Python :: 2.6",
-            "Programming Language :: Python :: 2.7",
-            "Programming Language :: C",
-            "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
-            "Operating System :: Unix",
-            "Development Status :: 4 - Beta",
-            "Environment :: Other Environment",
-            "Intended Audience :: Developers",
-            "Topic :: Software Development :: Libraries :: Python Modules",
-            "Topic :: Communications :: Usenet News"
-            ],
-	description	 = "yEnc Module for Python",
-        long_description = """
+    name		 = "yenc",
+    version		 = "0.4.0",
+    author		 = "Alessandro Duca",
+    author_email	 = "alessandro.duca@gmail.com",
+    url		 = "https://bitbucket.org/dual75/yenc",
+    license		 = "LGPL",
+    platforms        = ["Unix"],
+    package_dir	 = { '': 'lib' },
+    py_modules	 = ["yenc"],
+    ext_modules	 = [Extension("_yenc",["src/_yenc.c"],extra_compile_args=["-O2","-g"])],
+    classifiers      = [
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: C",
+        "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
+        "Operating System :: Unix",
+        "Development Status :: 4 - Beta",
+        "Environment :: Other Environment",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Communications :: Usenet News"
+        ],
+    description	 = "yEnc Module for Python",
+    long_description = """
 yEnc Encoding/Decoding for Python
 ---------------------------------
 
@@ -61,5 +61,5 @@ Supports encoding and decoding directly to files or to memory buffers
 with helper classes Encoder and Decoder.
 """
 
-	)
+    )
 
