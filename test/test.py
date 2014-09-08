@@ -37,7 +37,7 @@ import _yenc
 BLOCK_SIZE = 4096
 
 
-class BaseTest(object):
+class BaseTest(unittest.TestCase):
     CMD_DATA = "dd if=/dev/urandom of=%s bs=1b count=%d" 
 
     def setUp(self):
@@ -80,7 +80,7 @@ class TestLowLevel(unittest.TestCase):
         self.assertEqual(c, 3833259626)
 
 
-class TestFileFunctions(BaseTest, unittest.TestCase):
+class TestFileFunctions(BaseTest):
 
     def _testEncodeFile(self, filename):
         data, crc =  self._readFile(filename)
@@ -136,7 +136,7 @@ class TestFileFunctions(BaseTest, unittest.TestCase):
                 yenc.decode(encoded, null, crc_in=crc)
 
 
-class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
+class TestEncoderDecoderOnFile(BaseTest):
 
     def _testEncoderDecoder(self, filename):
         file_data, crc =  self._readFile(filename)
