@@ -45,7 +45,7 @@ def main():
                 m_obj = CRC32_RE.match(line)
                 if m_obj:
                     head_crc = m_obj.group(1)
-            except re.error, e:
+            except re.error:
                 sys.stderr.write("err-critical: malformed =ybegin header\n")
                 sys.exit(1)
             break
@@ -66,7 +66,7 @@ def main():
                 m_obj = CRC32_RE.match(line)
                 if m_obj:
                     trail_crc = m_obj.group(1)
-            except re.error, e:
+            except re.error:
                 sys.stderr.write("err: malformed =yend trailer\n")
             break
         elif not line:

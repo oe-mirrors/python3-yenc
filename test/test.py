@@ -147,7 +147,7 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
         
         encoder = yenc.Encoder(file_out)
         data = file_in.read(BLOCK_SIZE)
-        while(len(data)):
+        while len(data):
             encoder.feed(data)
             data = file_in.read(BLOCK_SIZE)
         file_in.close()
@@ -163,7 +163,7 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
 
         decoder = yenc.Decoder(file_out)
         data = file_in.read(BLOCK_SIZE)
-        while(len(data) > 0):
+        while len(data) > 0:
             decoder.feed(data)
             data = file_in.read(BLOCK_SIZE)
         file_in.close()
@@ -190,12 +190,12 @@ class TestEncoderDecoderOnFile(BaseTest, unittest.TestCase):
         encoder.feed('some data')
         encoder.close()
         self.assertFalse(encoder._output_file)
-        self.assertRaises(IOError, encoder.feed, ('some data'))
+        self.assertRaises(IOError, encoder.feed, 'some data')
  
     def testEncoderTerminated(self):
         encoder = yenc.Encoder(open('afile.out', 'wb'))
         encoder.terminate()
-        self.assertRaises(IOError, encoder.feed, ('some data'))
+        self.assertRaises(IOError, encoder.feed, 'some data')
 
     def testDecoderClose(self):
         decoder = yenc.Decoder(open('afile.out', 'wb'))

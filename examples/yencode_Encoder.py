@@ -40,9 +40,7 @@ def main():
             file_out = open(a,"wb")
     if args:
         filename = args[0]
-        if os.access( filename, os.F_OK | os.R_OK ):
-            file_in = open(filename,"rb")
-        else:
+        if not os.access( filename, os.F_OK | os.R_OK ):
             print "couldn't access %s" % filename
             sys.exit(2)
     else:

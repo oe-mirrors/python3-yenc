@@ -133,7 +133,6 @@ class Encoder:
         if self._output_file is None:
             raise ValueError("Output file is 'None'")
 
-        self._output_file.flush()
         self._output_file.close()
         self._output_file = None
         self._feedable = False
@@ -206,7 +205,6 @@ class Decoder:
         if self._output_file is None:
             raise ValueError("Output file is 'None'")
 
-        self._output_file.flush()
         self._output_file.close()
         self._output_file = None
         self._feedable = False

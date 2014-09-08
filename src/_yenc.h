@@ -38,8 +38,6 @@
  */
 #define LONGBUFF	( 2 * BLOCK / LINESIZE + 1) * ( LINESIZE + 2 ) 
 
-#define SMALLBUFF 	512
-
 #define ZERO		0x00
 #define CR		0x0d
 #define	LF		0x0a
@@ -47,15 +45,6 @@
 #define TAB		0x09
 #define SPACE		0x20
 #define DOT             0x2e
-
-#define E_MODE		1
-#define E_EOF 		2
-#define E_IO		3
-
-#define E_MODE_MSG	"Invalid mode for '*file' arguments"
-#define E_IO_MSG	"I/O Error"
-
-#define _DDEBUG_
 
 
 /* Customized types		*/
