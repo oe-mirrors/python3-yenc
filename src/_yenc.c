@@ -20,6 +20,12 @@
 
 #include "_yenc.h"
 
+#if PY_MAJOR_VERSION < 3
+#	define BYTES_ARG "s"
+#else
+#	define BYTES_ARG "y"
+#endif
+
 /* Typedefs */
 typedef struct {
 	uInt crc;
@@ -77,8 +83,8 @@ static char* argnames[] = {"infile", "outfile", "bytez", NULL};
 /* Function declarations */
 static void crc_init(Crc32 *, uInt);
 static void crc_update(Crc32 *, uInt);
-static int encode_buffer(Byte *, Byte *, uInt, Crc32 *, uInt *);
-static int decode_buffer(Byte *, Byte *, uInt, Crc32 *, Bool *);
+static int encode_buffer(PyObject *, Byte *, Crc32 *, uInt *);
+static int decode_buffer(PyObject *, Byte *, Crc32 *, Bool *);
 PyObject* decode_string(PyObject* ,PyObject* ,PyObject* );
 
 /* Python API requirements */
@@ -106,14 +112,53 @@ static void crc_update(Crc32 *crc, uInt c)
 	crc->bytes++;
 }
 
+static PyObject* file_read(PyObject *Py_infile, uLong read_max)
+{
+	PyObject *read_buffer;
+	Py_ssize_t read_bytes;
+	
+	read_buffer = PyObject_CallMethod(Py_infile, "read", "k", read_max);
+	if(!read_buffer) {
+		return NULL;
+	}
+	read_bytes = PyBytes_Size(read_buffer);
+	if(read_bytes < 0) {
+		Py_DECREF(read_buffer);
+        	return NULL;
+	}
+	if(read_bytes > read_max) {
+		Py_DECREF(read_buffer);
+		PyErr_SetString(PyExc_ValueError,
+			"read() returned too much data");
+		return NULL;
+	}
+	return read_buffer;
+}
+
+static Bool file_write(
+		PyObject *Py_outfile,
+		Byte *write_buffer,
+		int encoded_bytes
+		)
+{
+	PyObject *result = PyObject_CallMethod(Py_outfile, "write",
+		BYTES_ARG "#", write_buffer, encoded_bytes);
+	if(!result) {
+		return 0;
+	}
+	Py_DECREF(result);
+	return 1;
+}
+
 static int encode_buffer(
-		Byte *input_buffer, 
+		PyObject *Py_input_string, 
 		Byte *output_buffer, 
-		uInt bytes, 
 		Crc32 *crc, 
 		uInt *col
 		)
 {
+	Byte *input_buffer = (Byte *)PyBytes_AS_STRING(Py_input_string);
+	uInt bytes = PyBytes_GET_SIZE(Py_input_string);
 	uInt encoded;
 	uInt in_ind;
 	uInt out_ind;
@@ -164,26 +209,22 @@ PyObject* encode_file(
 		PyObject* kwds
 		)
 {
-	Byte read_buffer[BLOCK];
+	PyObject *read_buffer;
 	Byte write_buffer[LONGBUFF];
 	uLong encoded = 0;
 	uInt col = 0;
-	uInt read_bytes;
 	uInt in_ind;
-	uInt encoded_bytes;
+	int encoded_bytes;
 	uLong bytes = 0;
 	Crc32 crc;
+	PyObject *result;
 
-	FILE *infile = NULL, *outfile = NULL;
 	PyObject *Py_infile = NULL, *Py_outfile = NULL;
 	
-	if(!PyArg_ParseTupleAndKeywords(args, kwds, "O!O!|l", argnames, \
-				&PyFile_Type, &Py_infile, \
-				&PyFile_Type, &Py_outfile, \
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OO|l", argnames, \
+				&Py_infile, \
+				&Py_outfile, \
 				&bytes)) return NULL;
-
-	infile = PyFile_AsFile(Py_infile);
-	outfile = PyFile_AsFile(Py_outfile);
 	
 	crc_init(&crc, 0xffffffffl);
 	while(encoded < bytes || bytes == 0){
@@ -192,35 +233,43 @@ PyObject* encode_file(
 		} else {
 			in_ind = BLOCK;
 		}
-		read_bytes = fread(&read_buffer, 1, in_ind, infile);
-		if(read_bytes < 1) {
-                        break;
+		read_buffer = file_read(Py_infile, in_ind);
+		if(!read_buffer) {
+                        return NULL;
                 }
-		encoded_bytes = encode_buffer(&read_buffer[0], &write_buffer[0], read_bytes, &crc, &col);
-		if(fwrite(&write_buffer, 1, encoded_bytes, outfile) != encoded_bytes) {
+		if(PyBytes_GET_SIZE(read_buffer) < 1) {
+			Py_DECREF(read_buffer);
 			break;
 		}
-		encoded += read_bytes;
-	}
-	if(ferror(infile) || ferror(outfile)) {
-		return PyErr_Format(PyExc_IOError, "I/O Error while encoding");
+		encoded_bytes = encode_buffer(read_buffer, &write_buffer[0], &crc, &col);
+		encoded += PyBytes_GET_SIZE(read_buffer);
+		Py_DECREF(read_buffer);
+		if(!file_write(Py_outfile, write_buffer, encoded_bytes)) {
+			return NULL;
+		}
 	}
 	if(col > 0) {
-		fputc(CR, outfile);
-		fputc(LF, outfile);
+		if(!file_write(Py_outfile, (Byte *)"\r\n", 2)) {
+			return NULL;
+		}
 	}
-	fflush(outfile);
+	result = PyObject_CallMethod(Py_outfile, "flush", NULL);
+	if(!result) {
+		return NULL;
+	}
+	Py_DECREF(result);
 	return Py_BuildValue("(l,L)", encoded, (long long)crc.crc);
 }
 
 static int decode_buffer(
-		Byte *input_buffer, 
+		PyObject *Py_input_string, 
 		Byte *output_buffer, 
-		uInt bytes, 
 		Crc32 *crc, 
 		Bool *escape
 		)
 {
+	Byte *input_buffer = (Byte *)PyBytes_AS_STRING(Py_input_string);
+	uInt bytes = PyBytes_GET_SIZE(Py_input_string);
 	uInt read_ind;
 	uInt decoded_bytes;
 	Byte byte;
@@ -256,7 +305,6 @@ PyObject* encode_string(
 	PyObject *Py_output_string;
 	PyObject *retval = NULL;
 	
-	Byte *input_buffer = NULL;
 	Byte *output_buffer = NULL;
 	long long crc_value = 0xffffffffll;
 	uInt input_len = 0;
@@ -278,11 +326,10 @@ PyObject* encode_string(
 
 	crc_init(&crc, (uInt)crc_value);
 	input_len = PyBytes_Size(Py_input_string);
-	input_buffer = (Byte *) PyBytes_AsString(Py_input_string);
 	output_buffer = (Byte *) malloc((2 * input_len / LINESIZE + 1) * (LINESIZE + 2));
 	if(!output_buffer)
 		return PyErr_NoMemory();
-	output_len = encode_buffer(input_buffer, output_buffer, input_len, &crc, &col);
+	output_len = encode_buffer(Py_input_string, output_buffer, &crc, &col);
 	Py_output_string = PyBytes_FromStringAndSize((char *)output_buffer, output_len);
 	if(!Py_output_string)
 		goto out;
@@ -301,27 +348,23 @@ PyObject* decode_file(
 		PyObject* kwds
 		)
 {
-	Byte read_buffer[BLOCK];
+	PyObject *read_buffer;
 	Byte write_buffer[LONGBUFF];
 	uLong decoded = 0;
-	uInt decoded_bytes;
-	uInt read_bytes;
+	int decoded_bytes;
 	uLong read_max;
+	PyObject *result;
 	
 	Bool escape = 0;
 	uLong bytes = 0;
 	Crc32 crc;
 
-	FILE *infile = NULL, *outfile = NULL;
 	PyObject *Py_infile = NULL, *Py_outfile = NULL;
 	
-	if(!PyArg_ParseTupleAndKeywords(args, kwds, "O!O!|l", argnames, \
-				&PyFile_Type, &Py_infile, \
-				&PyFile_Type, &Py_outfile, \
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OO|l", argnames, \
+				&Py_infile, \
+				&Py_outfile, \
 				&bytes)) return NULL;
-
-	infile = PyFile_AsFile(Py_infile);
-	outfile = PyFile_AsFile(Py_outfile);
 
 	crc_init(&crc, 0xffffffffl);
 	while(decoded < bytes || bytes == 0){
@@ -330,19 +373,27 @@ PyObject* decode_file(
 		} else {
 			read_max=BLOCK;
 		};
-		read_bytes = fread((Byte *)&read_buffer, 1, read_max, infile);
-		if(read_bytes == 0) break;
-		decoded_bytes = decode_buffer(&read_buffer[0],
-				&write_buffer[0],read_bytes, &crc, &escape);
-		if(fwrite(&write_buffer[0],1,decoded_bytes,outfile)!=decoded_bytes){
+		read_buffer = file_read(Py_infile, read_max);
+		if(!read_buffer) {
+			return NULL;
+		}
+		if(PyBytes_GET_SIZE(read_buffer) == 0) {
+			Py_DECREF(read_buffer);
 			break;
+		}
+		decoded_bytes = decode_buffer(read_buffer,
+				&write_buffer[0], &crc, &escape);
+		Py_DECREF(read_buffer);
+		if(!file_write(Py_outfile, &write_buffer[0],decoded_bytes)){
+			return NULL;
 		}
 		decoded += decoded_bytes;
 	}
-	if(ferror(infile) || ferror(outfile)) {
-		return PyErr_Format(PyExc_IOError, "I/O Error while decoding");
+	result = PyObject_CallMethod(Py_outfile, "flush", NULL);
+	if(!result) {
+		return NULL;
 	}
-	fflush(outfile);
+	Py_DECREF(result);
 	return Py_BuildValue("(l,L)", decoded, (long long)crc.crc);
 }
 
@@ -356,7 +407,6 @@ PyObject* decode_string(
 	PyObject *Py_output_string;
 	PyObject *retval = NULL;
 	
-	Byte *input_buffer = NULL;
 	Byte *output_buffer = NULL;
 	long long crc_value = 0xffffffffll;
 	uInt input_len = 0;
@@ -377,11 +427,10 @@ PyObject* decode_string(
 		return NULL;
 	crc_init(&crc, (uInt)crc_value);
 	input_len = PyBytes_Size(Py_input_string);
-	input_buffer = (Byte *)PyBytes_AsString(Py_input_string);
 	output_buffer = (Byte *)malloc( input_len );
 	if(!output_buffer)
 		return PyErr_NoMemory();
-	output_len = decode_buffer(input_buffer, output_buffer, input_len, &crc, &escape);
+	output_len = decode_buffer(Py_input_string, output_buffer, &crc, &escape);
 	Py_output_string = PyBytes_FromStringAndSize((char *)output_buffer, output_len);
 	if(!Py_output_string)
 		goto out;

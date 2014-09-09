@@ -81,6 +81,15 @@ def _checkArgsType(file_in, file_out, bytez):
 def encode(file_in, file_out, bytez=0):
     """	encode(file_in, file_out, bytez=0): write "bytez" encoded bytes from
         file_in to file_out, if "bytez" is 0 encodes bytes until EOF.
+        
+        The input file object must implement a read() method, which will be
+        passed a "size" parameter, and should always return a bytes() object,
+        even at EOF. The output file object must implement write() and
+        flush() methods. The write() method is passed a byte string and
+        should write all the data it is passed; no return value is required.
+        The flush() method need not accept any parameters or return a value.
+        Both io.BufferedIOBase objects and Python 2's file objects are
+        compatible.
     """
     with _checkArgsType(file_in, file_out, bytez) as [file_in, file_out, bytez]:
         encoded, crc32 = _yenc.encode(file_in, file_out, bytez)
@@ -89,7 +98,9 @@ def encode(file_in, file_out, bytez=0):
 
 def decode(file_in, file_out, bytez=0, crc_in=""):
     """ 	decode(file_in, file_out, bytez=0): write "bytez" decoded bytes from
-        file_in to file_out, if "bytez" is 0 decodes bytes until EOF.
+        file_in to file_out, if "bytez" is 0 decodes bytes until EOF. Input
+        and output file objects must implement same interfaces as for
+        encode().
     """
     with _checkArgsType(file_in, file_out, bytez) as [file_in, file_out, bytez]:
         decoded, crc32 = _yenc.decode(file_in, file_out, bytez)

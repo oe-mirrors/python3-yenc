@@ -19,7 +19,6 @@
  */ 
 
 #include <Python.h>
-#include <stdio.h>
 
 /* Constants			*/
 #define	LINESIZE	128
