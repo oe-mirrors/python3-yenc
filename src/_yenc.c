@@ -77,8 +77,6 @@ static char* argnames[] = {"infile", "outfile", "bytez", NULL};
 /* Function declarations */
 static void crc_init(Crc32 *, uInt);
 static void crc_update(Crc32 *, uInt);
-static Bool readable(FILE *);
-static Bool writable(FILE *);
 static int encode_buffer(Byte *, Byte *, uInt, Crc32 *, uInt *);
 static int decode_buffer(Byte *, Byte *, uInt, Crc32 *, Bool *);
 PyObject* decode_string(PyObject* ,PyObject* ,PyObject* );
@@ -107,24 +105,6 @@ static void crc_update(Crc32 *crc, uInt c)
 	crc->crc=crc_tab[(crc->crc^c)&0xff]^((crc->crc>>8)&0xffffff);
 	crc->bytes++;
 }
-
-/*
- * Todo: provide alternatives for this to work on win32
- */
-static Bool writable(FILE *file)
-{
-	int mode = fcntl(fileno(file),F_GETFL) & O_ACCMODE;
-	return (mode == O_WRONLY) || (mode == O_RDWR);
-}
-
-static Bool readable(FILE *file)
-{
-	int mode = fcntl(fileno(file),F_GETFL) & O_ACCMODE;
-	return (mode == O_RDONLY) || (mode == O_RDWR);
-}
-/*
- * 
- */
 
 static int encode_buffer(
 		Byte *input_buffer, 
@@ -204,10 +184,6 @@ PyObject* encode_file(
 
 	infile = PyFile_AsFile(Py_infile);
 	outfile = PyFile_AsFile(Py_outfile);
-	
-	if(!readable(infile) || !writable(outfile) ) {
-		return PyErr_Format(PyExc_ValueError, "file objects not writeable/readable");
-	} 
 	
 	crc_init(&crc, 0xffffffffl);
 	while(encoded < bytes || bytes == 0){
@@ -346,11 +322,6 @@ PyObject* decode_file(
 
 	infile = PyFile_AsFile(Py_infile);
 	outfile = PyFile_AsFile(Py_outfile);
-
-	if(!readable(infile) || !writable(outfile)) {
-		return PyErr_Format(PyExc_ValueError,
-				"file objects not writeable/readable");
-	} 
 
 	crc_init(&crc, 0xffffffffl);
 	while(decoded < bytes || bytes == 0){
