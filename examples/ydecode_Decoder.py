@@ -85,7 +85,7 @@ def main():
         tmp_crc = trail_crc.lower()
     else:
         sys.exit(0)
-#    print "comparing"
+#    sys.stderr.write("comparing\n")
     if tmp_crc != dec.getCrc32():
         sys.stderr.write("err: header: %s dec: %s CRC32 mismatch\n" % (tmp_crc,dec.getCrc32()) )
         sys.exit(1)

@@ -41,7 +41,7 @@ def main():
     if args:
         filename = args[0]
         if not os.access( filename, os.F_OK | os.R_OK ):
-            print "couldn't access %s" % filename
+            sys.stderr.write("couldn't access %s\n" % filename)
             sys.exit(2)
     else:
         usage()
@@ -61,7 +61,7 @@ def main():
     file_out.write("=yend size=%d crc32=%s\r\n" % (size, encoder.getCrc32()) )
 
 def usage():
-    print "Usage: yencode_Encoder.py <-o outfile> filename"
+    sys.stderr.write("Usage: yencode_Encoder.py <-o outfile> filename\n")
     sys.exit(1)
 
 if __name__ == "__main__":
