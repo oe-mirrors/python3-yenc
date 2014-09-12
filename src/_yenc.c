@@ -294,7 +294,7 @@ PyObject* encode_string(
 				kwds,
 				"O!|Li", 
 				kwlist,
-				&PyString_Type,
+				&PyBytes_Type,
 				&Py_input_string, 
 				&crc_value,
 				&col
@@ -302,13 +302,13 @@ PyObject* encode_string(
 		return NULL;
 
 	crc_init(&crc, (uInt)crc_value);
-	input_len = PyString_Size(Py_input_string);
-	input_buffer = (Byte *) PyString_AsString(Py_input_string);
+	input_len = PyBytes_Size(Py_input_string);
+	input_buffer = (Byte *) PyBytes_AsString(Py_input_string);
 	output_buffer = (Byte *) malloc((2 * input_len / LINESIZE + 1) * (LINESIZE + 2));
 	if(!output_buffer)
 		return PyErr_NoMemory();
 	output_len = encode_buffer(input_buffer, output_buffer, input_len, &crc, &col);
-	Py_output_string = PyString_FromStringAndSize((char *)output_buffer, output_len);
+	Py_output_string = PyBytes_FromStringAndSize((char *)output_buffer, output_len);
 	if(!Py_output_string)
 		goto out;
 
@@ -399,20 +399,20 @@ PyObject* decode_string(
 				kwds,
 				"O!|Li", 
 				kwlist,
-				&PyString_Type,
+				&PyBytes_Type,
 				&Py_input_string, 
 				&crc_value,
 				&escape
 				)) 
 		return NULL;
 	crc_init(&crc, (uInt)crc_value);
-	input_len = PyString_Size(Py_input_string);
-	input_buffer = (Byte *)PyString_AsString(Py_input_string);
+	input_len = PyBytes_Size(Py_input_string);
+	input_buffer = (Byte *)PyBytes_AsString(Py_input_string);
 	output_buffer = (Byte *)malloc( input_len );
 	if(!output_buffer)
 		return PyErr_NoMemory();
 	output_len = decode_buffer(input_buffer, output_buffer, input_len, &crc, &escape);
-	Py_output_string = PyString_FromStringAndSize((char *)output_buffer, output_len);
+	Py_output_string = PyBytes_FromStringAndSize((char *)output_buffer, output_len);
 	if(!Py_output_string)
 		goto out;
 
