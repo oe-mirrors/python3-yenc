@@ -79,7 +79,6 @@ static void crc_init(Crc32 *, uInt);
 static void crc_update(Crc32 *, uInt);
 static Bool readable(FILE *);
 static Bool writable(FILE *);
-void init_yenc(void);
 static int encode_buffer(Byte *, Byte *, uInt, Crc32 *, uInt *);
 static int decode_buffer(Byte *, Byte *, uInt, Crc32 *, Bool *);
 PyObject* decode_string(PyObject* ,PyObject* ,PyObject* );
@@ -425,8 +424,22 @@ out:
 }
 
 
+#if PY_MAJOR_VERSION < 3
 void init_yenc()
 {
 	Py_InitModule3("_yenc", funcs, "Raw yenc operations");
 }
+#else
+PyObject* PyInit__yenc()
+{
+	static struct PyModuleDef moduledef = {
+		/* m_base */ PyModuleDef_HEAD_INIT,
+		/* m_name */ "_yenc",
+		/* m_doc */ "Raw yenc operations",
+		/* m_size */ -1,
+		/* m_methods */ funcs,
+	};
+	return PyModule_Create(&moduledef);
+}
+#endif
 

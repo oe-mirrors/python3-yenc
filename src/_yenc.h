@@ -58,7 +58,9 @@ PyObject* encode_file(PyObject*, PyObject*, PyObject*);
 PyObject* decode_file(PyObject*, PyObject*, PyObject*);
 PyObject* encode_string(PyObject* ,PyObject* ,PyObject*);
 PyObject* decode_string(PyObject* ,PyObject* , PyObject*);
+
+#if PY_MAJOR_VERSION < 3
 void init_yenc(void);
-
-
-
+#else
+PyObject* PyInit__yenc(void);
+#endif
